@@ -23,9 +23,15 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 _OPENER = urllib.request.build_opener(_NoRedirect)
 
+# urllib se presenta como "Python-urllib/3.x", que Cloudflare y otros WAF rechazan con 403.
+USER_AGENT = "hermes-laya-router/0.1"
+
 
 def http_json(method: str, url: str, headers: dict, body: Optional[bytes], timeout_s: float) -> Tuple[int, bytes]:
-    req = urllib.request.Request(url, data=body, headers=headers or {}, method=method)
+    headers = dict(headers or {})
+    if not any(k.lower() == "user-agent" for k in headers):
+        headers["User-Agent"] = USER_AGENT
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
         with _OPENER.open(req, timeout=timeout_s) as resp:
             return resp.status, resp.read()

@@ -66,6 +66,21 @@ def test_ok_returns_status_and_body(servers):
     assert http_json("GET", s.url + "/api/", {"Authorization": SECRET}, None, 2) == (200, b'{"ok": true}')
 
 
+def test_default_user_agent_is_not_python_urllib(servers):
+    # Cloudflare y otros WAF bloquean "Python-urllib" con 403 (error 1010).
+    s = servers(lambda h: (200, {}, b"{}"))
+    http_json("GET", s.url + "/api/", {}, None, 2)
+    ua = s.requests[0]["headers"]["User-Agent"]
+    assert ua.startswith("hermes-laya-router/")
+    assert "urllib" not in ua.lower()
+
+
+def test_explicit_user_agent_is_respected(servers):
+    s = servers(lambda h: (200, {}, b"{}"))
+    http_json("GET", s.url + "/api/", {"User-Agent": "otro/1"}, None, 2)
+    assert s.requests[0]["headers"]["User-Agent"] == "otro/1"
+
+
 def test_redirect_is_not_followed_and_auth_never_reaches_target(servers):
     target = servers(lambda h: (200, {}, b"robado"))
     origin = servers(lambda h: (302, {"Location": target.url + "/captura"}, b"movido"))
