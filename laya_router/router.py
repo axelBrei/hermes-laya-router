@@ -6,10 +6,15 @@ from typing import Dict, List, Optional
 from .config import Config
 from .entities import Entity
 from .laya_client import Answer, Question
-from .textnorm import extract_hvac_mode, extract_temperature, lexicon_match
+from .textnorm import extract_hvac_mode, extract_temperature, lexicon_match, tokens
 
 ACTIONS = ("turn_on", "turn_off", "all_off", "lights_off", "climate_off", "set_climate", "none")
 AGGREGATES = {"all_off", "lights_off", "climate_off"}
+
+# Verificación determinista de la acción contra el texto: el clasificador puede confundir
+# "prende la luz" con lights_off (apagar TODAS las luces), y eso no se ejecuta sin una palabra de apagado.
+_OFF_STEMS = ("apag", "desactiv", "off")
+_ON_STEMS = ("prend", "encend", "activ", "pone", "ponga", "ponel")
 
 _NONE_TARGET = ("none", "ninguno o no aplica")
 
@@ -23,6 +28,21 @@ _ACTION_CHOICES = [
     ("none", "no es una orden para la casa"),
 ]
 assert tuple(v for v, _ in _ACTION_CHOICES) == ACTIONS
+
+
+def _has_stem(text: str, stems) -> bool:
+    return any(t.startswith(p) for t in tokens(text) for p in stems)
+
+
+def _intent_mismatch(action: str, text: str) -> bool:
+    """True si el texto no respalda la acción: apagar exige una palabra de apagado; prender
+    exige una de encendido y ninguna de apagado."""
+    off = _has_stem(text, _OFF_STEMS)
+    if action in AGGREGATES or action == "turn_off":
+        return not off
+    if action == "turn_on":
+        return off or not _has_stem(text, _ON_STEMS)
+    return False
 
 
 def prefilter(text: str, cfg: Config) -> bool:
@@ -71,6 +91,9 @@ def build_input(text: str, history: List[dict], history_turns: int) -> List[dict
                 and isinstance(m.get("content"), str)
             ):
                 out.append({"role": m["role"], "content": m["content"]})
+    # Hermes ya incluye el mensaje actual en el historial: no mandarlo dos veces.
+    if out and out[-1] == {"role": "user", "content": text}:
+        out.pop()
     out.append({"role": "user", "content": text})
     return out
 
@@ -152,6 +175,8 @@ def decide(
     reason = ""
     if not fast_allowed:
         reason = "ejecución directa no permitida"
+    elif _intent_mismatch(action, text):
+        reason = "la acción no coincide con el texto"
     elif confs["action"] < thr:
         reason = "action bajo el umbral execute"
     elif action not in AGGREGATES and not targets_exact:

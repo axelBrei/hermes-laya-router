@@ -229,3 +229,45 @@ def test_targets_exact_defaults_true(cfg, cands):
     d = decide("prendé la luz de la oficina", answers(action=("turn_on", 0.95), target=("switch.luz_oficina", 0.95)),
                cands, cfg, True)
     assert d.path == "execute"
+
+
+def test_aggregate_off_without_off_word_is_hint_not_execute(cfg, cands):
+    # Caso real: "Prende la luz del pasillo" clasificado como lights_off con 0.97.
+    d = decide(
+        "Prende la luz del pasillo",
+        answers(action=("lights_off", 0.97), target=("switch.luz_oficina", 0.99)),
+        cands, cfg, True,
+    )
+    assert d.path == "hint" and "texto" in d.reason
+
+
+@pytest.mark.parametrize("action", ["all_off", "lights_off", "climate_off", "turn_off"])
+def test_off_actions_need_an_off_word(cfg, cands, action):
+    d = decide("la luz de la oficina", answers(action=(action, 0.99)), cands, cfg, True)
+    assert d.path == "hint"
+
+
+@pytest.mark.parametrize("text", ["apagá todo", "Apaga las luces", "desactivá el aire", "apague todo"])
+def test_off_actions_with_off_word_execute(cfg, cands, text):
+    d = decide(text, answers(action=("all_off", 0.95)), cands, cfg, True)
+    assert d.path == "execute"
+
+
+@pytest.mark.parametrize("text", ["prendé la luz", "Prende la luz", "encendé la luz", "poné la luz", "activá la luz"])
+def test_turn_on_with_on_word_executes(cfg, cands, text):
+    d = decide(text, answers(action=("turn_on", 0.95), target=("switch.luz_oficina", 0.95)), cands, cfg, True)
+    assert d.path == "execute"
+
+
+@pytest.mark.parametrize("text", ["la luz de la oficina", "apagá la luz", "prendé y apagá la luz"])
+def test_turn_on_without_clean_on_word_is_hint(cfg, cands, text):
+    d = decide(text, answers(action=("turn_on", 0.95), target=("switch.luz_oficina", 0.95)), cands, cfg, True)
+    assert d.path == "hint"
+
+
+def test_build_input_drops_current_message_already_in_history():
+    hist = [{"role": "assistant", "content": "ok"}, {"role": "user", "content": "prende la luz"}]
+    assert build_input("prende la luz", hist, 2) == [
+        {"role": "assistant", "content": "ok"},
+        {"role": "user", "content": "prende la luz"},
+    ]

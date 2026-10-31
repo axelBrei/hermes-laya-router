@@ -172,6 +172,8 @@ mensaje
 
 Ejemplo: con varias luces y "apagá la luz", si ninguna se llama "luz ..." la lista sale por dominio (no exacta) y el plugin solo deja la pista, aunque Laya elija una con confianza alta; el LLM pregunta o llama a `home_action`. Los agregados (`all_off`, `lights_off`, `climate_off`) no dependen de la lista de candidatos. Si varias entidades empatan por nombre (por ejemplo dos "Luz ..." y el mensaje solo dice "luz") y entran todas, la lista es exacta y decide el umbral de confianza del target.
 
+Verificación de la acción contra el texto: además de los umbrales, el plugin no ejecuta por el camino rápido una acción que el texto no respalda. Apagar (`turn_off`, `all_off`, `lights_off`, `climate_off`) exige una palabra de apagado (apag-, desactiv-, off); `turn_on` exige una de encendido (prend-, encend-, activ-, poné) y ninguna de apagado. Si no coincide, queda como pista. Esto cubre el caso en que el clasificador confunde "prende la luz" con `lights_off`.
+
 Detalles de la ejecución:
 
 - Acciones: `turn_on`, `turn_off`, `set_climate` (modo y temperatura 16-30, extraídos del texto), y los agregados `all_off`, `lights_off`, `climate_off`.
