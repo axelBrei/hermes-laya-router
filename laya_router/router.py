@@ -26,13 +26,15 @@ _SCOPE_STEMS = {
 
 _NONE_TARGET = ("none", "ninguno o no aplica")
 
+# Descripciones paralelas: todas nombran el mismo objeto y solo cambian verbo y alcance. Con "prender un
+# dispositivo" vs "apagar todas las luces", Laya elegía lights_off por compartir "luz" con el mensaje.
 _ACTION_CHOICES = [
-    ("turn_on", "prender un dispositivo"),
-    ("turn_off", "apagar un dispositivo"),
-    ("all_off", "apagar todo (luces y aires)"),
-    ("lights_off", "apagar todas las luces"),
-    ("climate_off", "apagar todos los aires"),
-    ("set_climate", "cambiar temperatura o modo de un aire"),
+    ("turn_on", "prender o encender una luz, un enchufe o un aire"),
+    ("turn_off", "apagar una luz, un enchufe o un aire"),
+    ("all_off", "apagar todo lo de la casa"),
+    ("lights_off", "apagar todas las luces de la casa"),
+    ("climate_off", "apagar todos los aires de la casa"),
+    ("set_climate", "cambiar la temperatura de un aire"),
     ("none", "no es una orden para la casa"),
 ]
 assert tuple(v for v, _ in _ACTION_CHOICES) == ACTIONS
