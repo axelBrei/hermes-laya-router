@@ -1,0 +1,4 @@
+name: laya-router
+version: "0.1.0"
+description: Clasifica pedidos de casa con Laya y los ejecuta en Home Assistant antes del LLM.
+requires_env: [HASS_URL, HASS_TOKEN, LAYA_BIFROST_URL, LAYA_BIFROST_API_KEY]
