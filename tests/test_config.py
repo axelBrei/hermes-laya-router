@@ -52,7 +52,7 @@ def test_all_defaults(tmp_path):
     assert cfg.bifrost_url_env == "LAYA_BIFROST_URL"
     assert cfg.bifrost_api_key_env == "LAYA_BIFROST_API_KEY"
     assert not hasattr(cfg, "bifrost_url")
-    assert (cfg.laya_timeout_s, cfg.ha_timeout_s) == (2.0, 5.0)
+    assert (cfg.laya_timeout_s, cfg.ha_timeout_s) == (6.0, 5.0)
     assert cfg.thresholds.is_home == 0.5
     assert cfg.domains == ["light", "switch", "climate"]
     assert cfg.exclude_from_all_off == [] and cfg.allowed_senders == [] and cfg.aliases == {}

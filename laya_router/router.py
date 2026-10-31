@@ -11,15 +11,15 @@ from .textnorm import extract_hvac_mode, extract_temperature, lexicon_match
 ACTIONS = ("turn_on", "turn_off", "all_off", "lights_off", "climate_off", "set_climate", "none")
 AGGREGATES = {"all_off", "lights_off", "climate_off"}
 
-_NONE_TARGET = ("none", "ninguna entidad concreta o no aplica")
+_NONE_TARGET = ("none", "ninguno o no aplica")
 
 _ACTION_CHOICES = [
-    ("turn_on", "prender o encender un dispositivo concreto"),
-    ("turn_off", "apagar un dispositivo concreto"),
-    ("all_off", "apagar TODO lo de la casa (luces y aires) a la vez"),
-    ("lights_off", "apagar solo las luces, todas a la vez"),
-    ("climate_off", "apagar solo los aires acondicionados, todos a la vez"),
-    ("set_climate", "ajustar temperatura o modo de un aire (frío, calor, grados)"),
+    ("turn_on", "prender un dispositivo"),
+    ("turn_off", "apagar un dispositivo"),
+    ("all_off", "apagar todo (luces y aires)"),
+    ("lights_off", "apagar todas las luces"),
+    ("climate_off", "apagar todos los aires"),
+    ("set_climate", "cambiar temperatura o modo de un aire"),
     ("none", "no es una orden para la casa"),
 ]
 assert tuple(v for v, _ in _ACTION_CHOICES) == ACTIONS
@@ -42,19 +42,19 @@ def build_questions(candidates: List[Entity]) -> List[Question]:
         Question(
             type="predicate",
             name="is_home",
-            instructions="¿El usuario pide controlar luces, aires o dispositivos de su casa?",
+            instructions="¿Pide controlar luces, aires o dispositivos de la casa?",
             choices=None,
         ),
         Question(
             type="choice",
             name="action",
-            instructions="¿Qué acción pide el usuario sobre la casa?",
+            instructions="¿Qué acción pide sobre la casa?",
             choices=list(_ACTION_CHOICES),
         ),
         Question(
             type="choice",
             name="target",
-            instructions="¿Sobre qué dispositivo concreto actúa el pedido?",
+            instructions="¿Sobre qué dispositivo?",
             choices=targets,
         ),
     ]

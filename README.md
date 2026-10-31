@@ -74,7 +74,7 @@ bifrost_model: "spanish"
 # Nombre de la variable de entorno que tiene la API key de Bifrost.
 bifrost_api_key_env: "LAYA_BIFROST_API_KEY"
 # Timeout (segundos) de la consulta a Laya; si vence, el turno sigue sin pista.
-laya_timeout_s: 2.0
+laya_timeout_s: 6.0
 # Timeout (segundos) de cada llamada a la API de Home Assistant.
 ha_timeout_s: 5.0
 thresholds:

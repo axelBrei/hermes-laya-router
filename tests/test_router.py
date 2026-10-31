@@ -63,7 +63,7 @@ def test_build_questions_shapes(cands):
     assert [q.name for q in qs] == ["is_home", "action", "target"]
     assert [q.type for q in qs] == ["predicate", "choice", "choice"]
     assert [v for v, _ in qs[1].choices] == list(ACTIONS)
-    assert qs[2].choices[-1] == ("none", "ninguna entidad concreta o no aplica")
+    assert qs[2].choices[-1] == ("none", "ninguno o no aplica")
     assert qs[2].choices[0] == ("switch.luz_oficina", cands[0].description())
     assert [v for v, _ in qs[2].choices] == ["switch.luz_oficina", "climate.living", "none"]
     assert qs[2].choices[1][1] == cands[1].description()
