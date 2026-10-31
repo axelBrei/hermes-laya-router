@@ -247,9 +247,38 @@ def test_off_actions_need_an_off_word(cfg, cands, action):
     assert d.path == "hint"
 
 
-@pytest.mark.parametrize("text", ["apagá todo", "Apaga las luces", "desactivá el aire", "apague todo"])
+@pytest.mark.parametrize("text", ["apagá todo", "Apaga todas las luces", "desactivá todo", "apague toda la casa"])
 def test_off_actions_with_off_word_execute(cfg, cands, text):
     d = decide(text, answers(action=("all_off", 0.95)), cands, cfg, True)
+    assert d.path == "execute"
+
+
+@pytest.mark.parametrize(
+    "action,text",
+    [
+        ("lights_off", "apagá la luz del cuarto"),  # singular + lugar: es un dispositivo, no todas
+        ("lights_off", "apaga el aire"),
+        ("climate_off", "apagá la luz del cuarto"),
+        ("all_off", "apagá las luces"),  # all_off exige "todo/toda la casa"
+    ],
+)
+def test_aggregates_need_an_all_word_matching_their_scope(cfg, cands, action, text):
+    d = decide(text, answers(action=(action, 0.99)), cands, cfg, True)
+    assert d.path == "hint"
+
+
+@pytest.mark.parametrize(
+    "action,text",
+    [
+        ("lights_off", "apagá las luces"),
+        ("lights_off", "apagá todas las luces"),
+        ("climate_off", "apagá los aires"),
+        ("climate_off", "apaga todos los aires acondicionados"),
+        ("all_off", "apagá todo"),
+    ],
+)
+def test_aggregates_with_matching_scope_execute(cfg, cands, action, text):
+    d = decide(text, answers(action=(action, 0.99)), cands, cfg, True)
     assert d.path == "execute"
 
 

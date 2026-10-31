@@ -15,6 +15,14 @@ AGGREGATES = {"all_off", "lights_off", "climate_off"}
 # "prende la luz" con lights_off (apagar TODAS las luces), y eso no se ejecuta sin una palabra de apagado.
 _OFF_STEMS = ("apag", "desactiv", "off")
 _ON_STEMS = ("prend", "encend", "activ", "pone", "ponga", "ponel")
+# Un agregado afecta a TODA la casa: además de apagar, el texto tiene que nombrar el alcance
+# ("todo", o el plural de lo que se apaga). "apagá la luz del cuarto" nunca es lights_off.
+_ALL_STEMS = ("tod",)
+_SCOPE_STEMS = {
+    "all_off": ("casa",),
+    "lights_off": ("luces", "lampar", "foco"),
+    "climate_off": ("aires", "acondicionad", "split", "clima"),
+}
 
 _NONE_TARGET = ("none", "ninguno o no aplica")
 
@@ -38,7 +46,9 @@ def _intent_mismatch(action: str, text: str) -> bool:
     """True si el texto no respalda la acción: apagar exige una palabra de apagado; prender
     exige una de encendido y ninguna de apagado."""
     off = _has_stem(text, _OFF_STEMS)
-    if action in AGGREGATES or action == "turn_off":
+    if action in AGGREGATES:
+        return not off or not _has_stem(text, _ALL_STEMS + _SCOPE_STEMS[action])
+    if action == "turn_off":
         return not off
     if action == "turn_on":
         return off or not _has_stem(text, _ON_STEMS)
